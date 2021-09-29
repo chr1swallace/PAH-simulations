@@ -1,5 +1,7 @@
 library(magrittr)
 library(data.table)
+library(ggplot2)
+library(seaborn)
 
 ntests=list(equal.high=rep(10000,7),
             equal.medium=rep(1000,7),
@@ -72,7 +74,6 @@ results=lapply(names(ntests), function(scen) {
 head(results)
 
 
-library(ggplot2)
 m=results[,.(fdr=mean(fdr),sfdr=mean(sfdr),fdr.se=sd(fdr)/sqrt(.N),sfdr.se=sd(sfdr)/sqrt(.N)),by=c("scenario", "imbalance","ss")] %>%
   melt(., c("scenario","imbalance","ss"), measure.vars=list(mean=c("fdr","sfdr"), se=c("fdr.se","sfdr.se"))) #
 m[,variable:=c("standard","stratified")[variable]]
@@ -81,7 +82,6 @@ m[,scenario:=factor(scenario,levels=names(ntests))]
 m[ss=="sens",ss:="Sensitivity"]
 m[ss=="fdr",ss:="FDR"]
 
-library(seaborn)
 theme_set(theme_bw())
 ggplot(m, aes(x=scenario, y=mean,ymin=mean-1.96*se,ymax=mean+1.96*se,col=variable))+
   geom_hline(aes(yintercept=mean+1.96*se),data=m[scenario=="equal.high" & variable=="standard"],linetype="dashed",col="grey") +
